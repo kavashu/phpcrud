@@ -1,0 +1,40 @@
+job('maven-dsl') {
+    parameters {
+        stringParam('abc', 'abc')
+    }
+
+    scm { 
+      git {
+            remote {
+                url('https://github.com/kavashu/test.git')
+                credentials('git_id')
+            }
+            branch('*/main')
+            
+}
+    }
+    
+    steps {
+        wrappers {
+        colorizeOutput()
+    }
+
+    maven {
+        mavenInstallation('maven')
+        goals('-B -DskipTests clean package')      
+    }
+    maven {
+        mavenInstallation('maven')
+        goals('test')      
+    }
+    shell('''
+             echo *******************RUNNING THE JAR*********************
+             java -jar /var/jenkins_home/workspace/maven-job/target/my-app-1.0-SNAPSHOT.jar
+          ''') 
+   
+}
+    publishers {
+        archiveArtifacts('target/*.jar')
+        mailer('shubham.kavale@gmail.com', true, true)
+    }
+}
